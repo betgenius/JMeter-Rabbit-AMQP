@@ -1,14 +1,12 @@
 package com.zeroclue.jmeter.protocol.amqp.gui;
 
-import java.awt.Dimension;
-
-import javax.swing.*;
-
+import com.zeroclue.jmeter.protocol.amqp.AMQPPublisher;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.gui.JLabeledTextArea;
 import org.apache.jorphan.gui.JLabeledTextField;
 
-import com.zeroclue.jmeter.protocol.amqp.AMQPPublisher;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * AMQP Sampler
@@ -47,7 +45,6 @@ public class AMQPPublisherGui extends AMQPSamplerGui {
     /**
      * {@inheritDoc}
      */
-    @Override
     public String getLabelResource() {
         return this.getClass().getSimpleName();
     }
@@ -74,12 +71,12 @@ public class AMQPPublisherGui extends AMQPSamplerGui {
         replyToQueue.setText(sampler.getReplyToQueue());
         correlationId.setText(sampler.getCorrelationId());
         message.setText(sampler.getMessage());
+        headers.setText(sampler.getHeaders());
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
     public TestElement createTestElement() {
         AMQPPublisher sampler = new AMQPPublisher();
         modifyTestElement(sampler);
@@ -105,6 +102,7 @@ public class AMQPPublisherGui extends AMQPSamplerGui {
         sampler.setMessageType(messageType.getText());
         sampler.setReplyToQueue(replyToQueue.getText());
         sampler.setCorrelationId(correlationId.getText());
+        sampler.setHeaders(headers.getText());
     }
 
     @Override
@@ -133,6 +131,7 @@ public class AMQPPublisherGui extends AMQPSamplerGui {
         mainPanel.add(replyToQueue);
         mainPanel.add(correlationId);
         mainPanel.add(message);
+        mainPanel.add(headers);
     }
 
     /**
@@ -148,5 +147,6 @@ public class AMQPPublisherGui extends AMQPSamplerGui {
         replyToQueue.setText("");
         correlationId.setText("");
         message.setText("");
+        headers.setText("");
     }
 }

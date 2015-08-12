@@ -1,17 +1,18 @@
 package com.zeroclue.jmeter.protocol.amqp;
 
 import com.rabbitmq.client.AMQP;
-import java.io.IOException;
-import java.security.*;
-
-import com.rabbitmq.client.MessageProperties;
+import com.rabbitmq.client.Channel;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.Interruptible;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 
-import com.rabbitmq.client.Channel;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 /**
  * JMeter creates an instance of a sampler class for every occurrence of the
@@ -31,6 +32,7 @@ public class AMQPPublisher extends AMQPSampler implements Interruptible {
 
     //++ These are JMX names, and must not be changed
     private final static String MESSAGE = "AMQPPublisher.Message";
+    private final static String HEADERS = "AMQPPublisher.Headers";
     private final static String MESSAGE_ROUTING_KEY = "AMQPPublisher.MessageRoutingKey";
     private final static String MESSAGE_TYPE = "AMQPPublisher.MessageType";
     private final static String REPLY_TO_QUEUE = "AMQPPublisher.ReplyToQueue";
@@ -51,7 +53,6 @@ public class AMQPPublisher extends AMQPSampler implements Interruptible {
     /**
      * {@inheritDoc}
      */
-    @Override
     public SampleResult sample(Entry e) {
         SampleResult result = new SampleResult();
         result.setSampleLabel(getName());
@@ -78,6 +79,9 @@ public class AMQPPublisher extends AMQPSampler implements Interruptible {
         result.sampleStart(); // Start timing
         try {
             AMQP.BasicProperties messageProperties = getProperties();
+            Map<String, Object> headersMap = new ObjectMapper().readValue(getHeaders(), Map.class);
+            messageProperties = messageProperties.builder().headers(headersMap).build();
+
             byte[] messageBytes = getMessageBytes();
 
             for (int idx = 0; idx < loop; idx++) {
@@ -143,6 +147,14 @@ public class AMQPPublisher extends AMQPSampler implements Interruptible {
         setProperty(MESSAGE, content);
     }
 
+    public String getHeaders() {
+        return getPropertyAsString(HEADERS);
+    }
+
+    public void setHeaders(String headers) {
+        setProperty(HEADERS, headers);
+    }
+
     /**
      * @return the message type for the sample
      */
@@ -193,7 +205,6 @@ public class AMQPPublisher extends AMQPSampler implements Interruptible {
        setProperty(USE_TX, tx);
     }
 
-    @Override
     public boolean interrupt() {
         cleanup();
         return true;
